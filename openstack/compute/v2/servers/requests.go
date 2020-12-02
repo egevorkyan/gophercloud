@@ -371,7 +371,6 @@ func ChangeAdminPassword(client *gophercloud.ServiceClient, id, newPassword stri
 
 // RebootMethod describes the mechanisms by which a server reboot can be requested.
 type RebootMethod string
-
 // These constants determine how a server should be rebooted.
 // See the Reboot() function for further details.
 const (
@@ -386,11 +385,25 @@ const (
 type RebootOptsBuilder interface {
 	ToServerRebootMap() (map[string]interface{}, error)
 }
+//Shutdown OptsBuilder
+type ShutdownOptsBuilder interface {
+	ToServerShutdownMap() (map[string]interface{}, error)
+}
 
 // RebootOpts provides options to the reboot request.
 type RebootOpts struct {
 	// Type is the type of reboot to perform on the server.
 	Type RebootMethod `json:"type" required:"true"`
+}
+
+type ShutdownOpts struct {
+	// Type is the type of reboot to perform on the server.
+	Type RebootMethod `json:"type" required:"true"`
+}
+
+// ToServerShutdownMap builds a body for the shutdown request.
+func (opts ShutdownOpts) ToServerShutdownMap() (map[string]interface{}, error) {
+	return gophercloud.BuildRequestBody(opts, "shutdown")
 }
 
 // ToServerRebootMap builds a body for the reboot request.
@@ -415,6 +428,18 @@ func (opts RebootOpts) ToServerRebootMap() (map[string]interface{}, error) {
 */
 func Reboot(client *gophercloud.ServiceClient, id string, opts RebootOptsBuilder) (r ActionResult) {
 	b, err := opts.ToServerRebootMap()
+	if err != nil {
+		r.Err = err
+		return
+	}
+	resp, err := client.Post(actionURL(client, id), b, nil, nil)
+	_, r.Header, r.Err = gophercloud.ParseResponse(resp, err)
+	return
+}
+
+//Shutdown Function
+func Shutdown(client *gophercloud.ServiceClient, id string, opts ShutdownOptsBuilder) (r ActionResult) {
+	b, err := opts.ToServerShutdownMap()
 	if err != nil {
 		r.Err = err
 		return
