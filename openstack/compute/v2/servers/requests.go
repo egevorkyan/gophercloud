@@ -403,7 +403,7 @@ type ShutdownOpts struct {
 
 // ToServerShutdownMap builds a body for the shutdown request.
 func (opts ShutdownOpts) ToServerShutdownMap() (map[string]interface{}, error) {
-	return gophercloud.BuildRequestBody(opts, "shutdown")
+	return gophercloud.BuildRequestBody(opts, "os-stop")
 }
 
 // ToServerRebootMap builds a body for the reboot request.
